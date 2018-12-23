@@ -37,6 +37,10 @@ object AdvancedPatternMatching extends App {
   println(greeting)
   println(legalStatus)
 
+  /*
+  The two objects below are companion objects solely for the purpose of pattern matching
+  So we can use lowercase for their names
+   */
   object even {
     def unapply(arg: Int): Boolean = arg % 2 == 0
   }
