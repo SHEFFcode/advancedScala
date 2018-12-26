@@ -3,24 +3,30 @@ package playground
 object ScalaPlayground  extends App {
   println("Hello world")
   object Solution {
-    def multiply(num1: String, num2: String): String = {
-      val pos: Array[Int] = new Array[Int](num1.length + num2.length)
-
+    def exist(board: Array[Array[Char]], word: String): Boolean = {
       for {
-        i <- Range(num1.length - 1, -1, -1)
-        j <- Range(num2.length - 1, -1, -1)
+        i <- 0 to board.length
+        j <- 0 to board(0).length
       } yield {
-        val mul = (num1(i) - '0') * (num2(j) - '0')
-        val p1 = i + j
-        val p2 = i + j + 1
-        val sum = mul + pos(p2)
-        pos(p1) += sum / 10
-        pos(p2) = sum % 10
+        if (exists(board, i, j, word, 0)) return true
       }
-      pos.mkString.replaceFirst("^0+(?!$)", "")
+      false
+    }
+
+    def exists(board: Array[Array[Char]], i: Int, j: Int, word: String, wIndex: Int): Boolean = {
+      if (wIndex == word.length) return true
+      if (i < 0 || j < 0 || (i == board.length) || (j == board(i).length)) return false
+      if (board(i)(j) != word(wIndex)) return false
+      val temp = board(i)(j)
+      val nextWIndex = wIndex + 1
+      val wordExists =
+        exists(board, i, j + 1, word, nextWIndex) ||
+          exists(board, i, j - 1, word, nextWIndex) ||
+          exists(board, i + 1, j, word, nextWIndex) ||
+          exists(board, i - 1, j, word, nextWIndex)
+      board(i)(j) = temp
+      wordExists
     }
   }
-
-  val solution = Solution.multiply("123", "456")
 
 }
