@@ -53,7 +53,7 @@ class EmptySet[A] extends MySet[A] {
 
   // Say you are given Set(1, 2, 3), return everything but that set
 
-  override def unary_! : MySet[A] = new AllInclusiveSet[A]
+  override def unary_! : MySet[A] = new PropertyBasedSet[A](_ => true)
 }
 
 class AllInclusiveSet[A] extends MySet[A] {
@@ -172,37 +172,7 @@ class NonEmptySet[A](head: A, tail: MySet[A]) extends MySet[A] {
   override def &(anotherSet: MySet[A]): MySet[A] = this filter anotherSet // intersection and filter is the same thing
 
   // new operator
-  override def unary_! : MySet[A] = {
-    new MySet[A] {
-      override def contains(element: A): Boolean = ???
-
-      override def +(element: A): MySet[A] = ???
-
-      override def ++(anotherSet: MySet[A]): MySet[A] = ???
-
-      override def map[B](f: A => B): MySet[B] = ???
-
-      override def flatMap[B](f: A => MySet[B]): MySet[B] = ???
-
-      override def filter(predicate: A => Boolean): MySet[A] = ???
-
-      override def foreach(f: A => Unit): Unit = ???
-
-      /**
-        * Exercise:
-        * - removing an element
-        * - intersection with another set
-        * - difference with another set
-        */
-      override def -(elem: A): MySet[A] = ???
-
-      override def --(anotherSet: MySet[A]): MySet[A] = ???
-
-      override def &(anotherSet: MySet[A]): MySet[A] = ???
-
-      override def unary_! : MySet[A] = ???
-    }
-  }
+  override def unary_! : MySet[A] = new PropertyBasedSet[A](!this.contains(_))
 }
 
 object MySet {
@@ -225,5 +195,14 @@ object MySet {
 object MySetPlayground extends App {
   val s = MySet(1, 2, 3, 4)
   s + 5 ++ MySet(-1, -2) + 3 flatMap (x => MySet(x, x * 10)) filter (_ % 2 == 0) foreach println
+
+  val negative = !s // or s.unary_!(s) = all the naturals not equal to 1, 2, 3  or 4
+  println(negative(2)) // should not be in the set
+  println(negative(5)) // this should be available
+
+  val negativeEven = negative filter (_ % 2 == 0)
+  println(negativeEven(5)) // I should get false here now
+  val negativeEven5 = negativeEven+ 5 // all the even numbers bigger then 4, then less 5 because of the logic above, + 5, should include 5
+  println(negativeEven5(5)) // true again
 }
 
