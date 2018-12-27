@@ -3,29 +3,47 @@ package playground
 object ScalaPlayground  extends App {
   println("Hello world")
   object Solution {
-    def exist(board: Array[Array[Char]], word: String): Boolean = {
-      for {
-        i <- 0 to board.length
-        j <- 0 to board(0).length
-      } yield {
-        if (exists(board, i, j, word, 0)) return true
+    def findMissingRanges(nums: Array[Int], lower: Int, upper: Int): List[String] = {
+      val missingRanges = new StringBuilder
+      if (nums.isEmpty) {
+        finalOperation(lower, upper, missingRanges)
+        return if (missingRanges.nonEmpty) missingRanges.toString.split(',').toList else List()
       }
-      false
-    }
 
-    def exists(board: Array[Array[Char]], i: Int, j: Int, word: String, wIndex: Int): Boolean = {
-      if (wIndex == word.length) return true
-      if (i < 0 || j < 0 || (i == board.length) || (j == board(i).length)) return false
-      if (board(i)(j) != word(wIndex)) return false
-      val temp = board(i)(j)
-      val nextWIndex = wIndex + 1
-      val wordExists =
-        exists(board, i, j + 1, word, nextWIndex) ||
-          exists(board, i, j - 1, word, nextWIndex) ||
-          exists(board, i + 1, j, word, nextWIndex) ||
-          exists(board, i - 1, j, word, nextWIndex)
-      board(i)(j) = temp
-      wordExists
+      def finalOperation(lower: Int, upper: Int, sb: StringBuilder) = {
+        if (lower < upper) sb ++= s"$lower->$upper"
+        if (lower == upper) sb ++= s"$lower"
+      }
+
+      def recurse(nums: Array[Int], lower: Int, upper: Int, sb: StringBuilder, index: Int): StringBuilder = {
+        val num = nums(index)
+        nums(index) match {
+          case n if lower < n - 1 => {
+            sb ++= s"$lower->${num - 1},"
+            if (index + 1 == nums.length - 1)  {
+              finalOperation(lower, upper, sb)
+              return sb
+            }
+            recurse(nums, num + 1, upper, sb, index + 1)
+
+          }
+          case n if lower == n - 1 => {
+            if (index + 1 == nums.length - 1)  {
+              sb ++= s"$lower,"
+              finalOperation(lower, upper, sb)
+              return sb
+            }
+            recurse(nums, num + 1, upper, sb, index + 1)
+
+          }
+          case n if n == Integer.MAX_VALUE => return sb
+          case _ =>
+        }
+      }
+
+      recurse(nums, lower, upper, missingRanges, 0)
+
+      if (missingRanges.nonEmpty) missingRanges.toString.split(',').toList else List()
     }
   }
 
