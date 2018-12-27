@@ -84,35 +84,4 @@ object LazyEvaluation extends App {
 
   // this is the same as
   List(1, 2, 3).withFilter(_ % 2 == 0).map(_ + 1)  // List[Int]
-
-  /**
-    * Exercise
-    * 1. Implement a lazy evaluated, singly linked stream of values
-    *   - val naturals = MyStream.from(1)(x => x + 1)  => this will become a stream of natural numbers (potentially infinite )
-    *   - naturals.take(100) => lazily evaluated stream of the first 100 naturals (this is a finite stream, but still lazily evaluated)
-    *   - naturals.map(_ * 2) // stream of all even numbers (potentially infinite)
-    */
-
-  abstract class MyStream[+A] {
-    def isEmpty: Boolean
-    def head: A
-    def tail: MyStream[A]
-
-    def #::[B >: A](element: B): MyStream[A] // prepend operator, this is a variance problem
-    def ++:[B >: A](anotherStream: MyStream[B]): MyStream[B] // another covariance problem, concats two streams
-
-    def foreach(f: A => Unit): Unit
-    def map[B](f: A => B): MyStream[B]
-    def flatMap[B](f: A => MyStream[B]): MyStream[B]
-    def filter(predicate: A => Boolean): MyStream[A]
-
-    def take(n: Int): MyStream[A] // takes the first n elements out of the stream
-    def takeAsList(n: Int): List[A]
-
-    object MyStream {
-      def from[A](start: A)(generator: A => A): MyStream[A] = ???
-    }
-  }
-
-
 }
