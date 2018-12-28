@@ -1,4 +1,4 @@
-package lectures
+package lectures.part1.beginning
 
 object AdvancedPatternMatchingII extends App {
   // Infix patterns
