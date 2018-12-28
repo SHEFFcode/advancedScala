@@ -37,7 +37,6 @@ object ScalaPlayground  extends App {
 
           }
           case n if n == Integer.MAX_VALUE => return sb
-          case _ =>
         }
       }
 

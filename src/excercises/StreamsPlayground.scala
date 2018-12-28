@@ -43,7 +43,7 @@ object EmptyStream extends MyStream[Nothing] {
 
   override def tail: MyStream[Nothing] = throw new NoSuchElementException
 
-  override def #::[B >: Nothing](element: B): MyStream[B] = new Cons[B](element, this) // prepend operator
+//  override def #::[B >: Nothing](element: B): MyStream[B] = new Cons[B](element, this) // prepend operator
 
   override def ++:[B >: Nothing](anotherStream: MyStream[B]): MyStream[B] = anotherStream
 
@@ -57,6 +57,7 @@ object EmptyStream extends MyStream[Nothing] {
 
   override def take(n: Int): MyStream[Nothing] = this
 
+  override def #::[B >: Nothing](element: B): MyStream[Nothing] = ???
 }
 
 class Cons[+A](hd: A, tl: => MyStream[A]) extends MyStream[A] {
@@ -66,9 +67,9 @@ class Cons[+A](hd: A, tl: => MyStream[A]) extends MyStream[A] {
 
   override lazy val tail: MyStream[A] = tl // this is called call by need (combining call by name with lazy val)
 
-  override def #::[B >: A](element: B): MyStream[A] = new Cons[A](element, this)
+//  override def #::[B >: A](element: B): MyStream[A] = new Cons[A](element, this)
 
-  override def ++:[B >: A](anotherStream: MyStream[B]): MyStream[B] = new Cons[B](head, tail ++ anotherStream)
+//  override def ++:[B >: A](anotherStream: MyStream[B]): MyStream[B] = new Cons[B](head, tail ++ anotherStream)
 
   override def foreach(f: A => Unit): Unit = {
     f(head)
@@ -77,7 +78,7 @@ class Cons[+A](hd: A, tl: => MyStream[A]) extends MyStream[A] {
 
   override def map[B](f: A => B): MyStream[B] = new Cons[B](f(head), tail.map(f))
 
-  override def flatMap[B](f: A => MyStream[B]): MyStream[B] = f(head) ++ tail.flatMap(f)
+//  override def flatMap[B](f: A => MyStream[B]): MyStream[B] = f(head) ++ tail.flatMap(f)
 
   override def filter(predicate: A => Boolean): MyStream[A] = {
     if (predicate(head)) new Cons[A](head, tail.filter(predicate))
@@ -90,6 +91,11 @@ class Cons[+A](hd: A, tl: => MyStream[A]) extends MyStream[A] {
     else new Cons(head, tail.take(n - 1))
   }
 
+  override def #::[B >: A](element: B): MyStream[A] = ???
+
+  override def ++:[B >: A](anotherStream: MyStream[B]): MyStream[B] = ???
+
+  override def flatMap[B](f: A => MyStream[B]): MyStream[B] = ???
 }
 
 object StreamsPlayground extends App {
