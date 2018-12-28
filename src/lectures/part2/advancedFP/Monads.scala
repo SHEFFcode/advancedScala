@@ -57,10 +57,44 @@ object Monads extends App {
     *   - FlatMap
     */
 
+  class Lazy[+A](value: => A) {
+    // call by need
+    private lazy val internalValue = value
+
+    def use: A = internalValue
+    def flatMap[B](f: (=>A) => Lazy[B]): Lazy[B] = f(internalValue) // here the function receives the parameter by name as well
+  }
+
+  object Lazy {
+    def apply[A](value: => A): Lazy[A] = new Lazy(value) // here instead of running any code we just return another instance
+  }
+
+  val lazyInstance = Lazy {
+    println("Today I don't feel like doing anything")
+    42
+  }
+
+  println(lazyInstance.use)
+
+  val flatMappedInstance = lazyInstance.flatMap(x => Lazy { x * 10 }) // do see the lyric here because the application of lazy is applied eagerly, but the value itself s not evaluated, only the function
+  val flatMappedInstance2 = lazyInstance.flatMap(x => Lazy { x * 10 }) // do see the lyric here because the application of lazy is applied eagerly, but the value itself s not evaluated, only the function
+
+  flatMappedInstance.use // we call the evaluation twice here, which is bad, we should use call by need
+  flatMappedInstance2.use
+
 
   /**
     * Exercise:
     * Monads can be thought of as apply + flatMap, but also as apply, map and flatten
     * Think about how to transform one into another
+    */
+
+  /**
+    * def flatMap[B](f: T => Monad[B]): Monad[B] = ... (implemented)
+    * def map[B](f: T => B): Monad[B] = flatMap(x => unit(f(x))) // which is a Monad[B] so an extra function to wrap in a monad
+    * def flatten(m: Monad[Monad[T]]): Monad[T] = m.flatMap((x: Monad[T]) => x)
+    *
+    * List(1, 2, 3).map(_ * 2) = List(1, 2, 3).flatMap(x => List(x * 2))
+    * List(List(1, 2), List(3, 4)).flatten = List(List(1, 2), List(3, 4)).flatMap(x => x) = List(1, 2, 3, 4)
     */
 }
