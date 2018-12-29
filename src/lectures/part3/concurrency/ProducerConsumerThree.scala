@@ -100,7 +100,7 @@ object ProducerConsumerThree extends App {
     */
 
   case class Friend(name: String) {
-    def bow(other: Friend) = {
+    def bow(other: Friend): Unit = {
       this.synchronized {
         println(s"$this: I am bowing to my friend $other")
         other.rise(this)
@@ -108,29 +108,29 @@ object ProducerConsumerThree extends App {
       }
     }
 
-    def rise(other: Friend) = {
+    def rise(other: Friend): Unit = {
       this.synchronized {
         println(s"$this: I am rising to my friend $other")
       }
     }
 
     var side = "right"
-    def switchSide = {
+    def switchSide(): Unit = {
       if (side == "right") side = "left"
       else side = "right"
     }
 
-    def pass(other: Friend) = {
+    def pass(other: Friend): Unit = {
       while (this.side == other.side) {
         println(s"$this: oh please $other, feel free to pass!")
-        switchSide
+        switchSide()
         Thread.sleep(1000) // to allow some time for my friend to pass
       }
     }
   }
 
-  val sam = new Friend("Same")
-  val pierre = new Friend("Pierre")
+  val sam = Friend("Same")
+  val pierre = Friend("Pierre")
 
 //  new Thread(() => sam.bow(pierre)).start() // this will case deadlock, both will stay bowed
 //  new Thread(() => pierre.bow(sam)).start()
