@@ -1,7 +1,8 @@
 package lectures.part3.concurrency
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future, Promise}
 import scala.util.{Failure, Random, Success}
+import scala.concurrent.duration._
 
 //important for futures
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -102,6 +103,67 @@ object FuturesAndPromises extends App {
 
   val fallbackResult = SocialNetwork.fetchProfile("unkown id").fallbackTo(SocialNetwork.fetchProfile("fb.id.0-dummy"))
 
-  Thread.sleep(2000) // again sleep here so that we get the futures to resolve
+
+  /**
+    * Small banking app here
+    */
+
+  case class User(name: String)
+  case class Transaction(sender: String, receiver: String, amount: Double, status: String)
+
+  object BankingApp {
+    val name = "SHEFFbank"
+
+    def fetchUser(name: String): Future[User] = Future {
+      Thread.sleep(200)
+      User(name)
+    }
+
+    def createTransaction(user: User, merchant: String, amount: Double): Future[Transaction] = Future {
+      Thread.sleep(1000)
+      Transaction(user.name, merchant, amount, "Success")
+    }
+
+    def purchase(userName: String, item: String, merchantName: String, cost: Double): String = {
+      // fetch the user from the db
+      //create a transaction
+      // WAIT for the transaction to finish
+      val transactionStatusFuture = for {
+        user <- fetchUser(userName)
+        transaction <- createTransaction(user, merchantName, cost)
+      } yield transaction.status
+
+      Await.result(transactionStatusFuture, 2.seconds) // implicit conversions -> pimp my library
+    }
+  }
+
+  println(BankingApp.purchase("Jeremy", "iPhone 12", "SHEFFstore", 3000)) // this will block, no need for sleeping main thread
+
+//  Thread.sleep(2000) // again sleep here so that we get the futures to resolve
+
+  /**
+    * Scala promises
+    */
+
+  val promise = Promise[Int]() // Controller over a future
+  val future = promise.future
+
+  //Thread # 1 - consumer
+  future.onComplete {
+    case Success(someResult) => println(s"[Consumer]: I have received $someResult")
+  }
+
+  // Thread #2 - producer
+  val producer = new Thread(() => {
+    println(s"[Producer]: crunching numbers...")
+    Thread.sleep(500)
+    // fullfilling the promise
+    promise.success(42) // manipulates the internal future to complete with value 42
+    println("[Producer]: done")
+  })
+
+  producer.start()
+
+  Thread.sleep(1000)
 }
 
