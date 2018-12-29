@@ -64,5 +64,83 @@ object ProducerConsumerThree extends App {
     (1 to nProducers).foreach(i => new Producer(i, buffer, capacity).start())
   }
 
-  multipleProdConst(3, 3)
+//  multipleProdConst(3, 3)
+
+  /**
+    * Excercises
+    * 1) Here the notify and notifyAll act in a similar manner, think of a case where they differ
+    * 2) Create Deadlock - one or more threads block each other and cannot continue
+    * 3) Create a LiveLock - all threads yield execution to each other in such a way that no one can continue
+    */
+
+  // 1) Notify all
+  def testNotifyAll(): Unit = {
+    val bell = new Object // POJO
+    (1 to 10).foreach( i => new Thread(() => {
+      bell.synchronized {
+        println(s"[Thread $i]: I am waiting for the bell to ring...")
+        bell.wait()
+        println(s"[Thread $i]: hooray!")
+      }
+    }).start())
+
+    new Thread(() => {
+      Thread.sleep(2000)
+      println(s"[Announcer]: Rock and roll!")
+//      bell.synchronized(bell.notifyAll())
+      bell.synchronized(bell.notify()) // this will keep the program running, but the sleeping threads will never wake up
+    }).start()
+  }
+
+//  testNotifyAll()
+
+  /**
+    * Deadlock - Imagine a society where you greet each other by bowing, and u can only straighten out when the other person started to
+    * This creates a situation where you will both stay bowed forever
+    */
+
+  case class Friend(name: String) {
+    def bow(other: Friend) = {
+      this.synchronized {
+        println(s"$this: I am bowing to my friend $other")
+        other.rise(this)
+        println(s"$this: my friend $other has risen")
+      }
+    }
+
+    def rise(other: Friend) = {
+      this.synchronized {
+        println(s"$this: I am rising to my friend $other")
+      }
+    }
+
+    var side = "right"
+    def switchSide = {
+      if (side == "right") side = "left"
+      else side = "right"
+    }
+
+    def pass(other: Friend) = {
+      while (this.side == other.side) {
+        println(s"$this: oh please $other, feel free to pass!")
+        switchSide
+        Thread.sleep(1000) // to allow some time for my friend to pass
+      }
+    }
+  }
+
+  val sam = new Friend("Same")
+  val pierre = new Friend("Pierre")
+
+//  new Thread(() => sam.bow(pierre)).start() // this will case deadlock, both will stay bowed
+//  new Thread(() => pierre.bow(sam)).start()
+
+  /**
+    * 3 Livelock - extremely polite society
+    * You and your friend come in from different directions on the same road, that you will give way to your friend to cross
+    */
+
+  new Thread(() => sam.pass(pierre)).start()
+  new Thread(() => pierre.pass(sam)).start()
+
 }
