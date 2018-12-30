@@ -25,4 +25,30 @@ object EqualityPlayground extends App {
   val anotherJohn = User("AnotherJOhn", 45, "superJOhn@gmail.com")
   println(Equal(john, anotherJohn)) // this is called AD-HOC polymorphism, based on the type of comparisons, the compiler will grab the right comparator instance for the types
 
+  /**
+    * Exercise:
+    *   - Improve this with an implicit conversion class:
+    *     - ===(anotherValue: T)
+    *     - !==(another: T)
+    */
+
+  implicit class TypeSafeEqual[T](value: T) {
+    def ===(otherValue: T)(implicit equalizer: Equal[T]): Boolean = equalizer.eq(value, otherValue)
+    def !==(otherValue: T)(implicit equalizer: Equal[T]): Boolean = !equalizer.eq(value, otherValue)
+  }
+
+  println(john === anotherJohn) // a lot of compiler magic happens here
+
+  /**
+    * Here is what the compiler does:
+    *   - john.===(anotherJohn)
+    *   - Since user does not have a === method, it will try to wrap the user in something that does have that method
+    *   - new TypeSafeEqual[User](john).===(anotherJohn)
+    *   - Do we have an implicit equalizer of type Equal[User]? We do, so let's inject that as well
+    *   - new TypeSafeEqual[User](john).===(anotherJohn)(UserEquality)
+    *   - The shorter code is nicer and reminds us of JS with it's === sign
+    * Another advantage is that it is TYPE SAFE:
+    *   - println(john === 43) will not compile, compiler will enforce that operation can be done only on the same type
+    */
+
 }
