@@ -35,7 +35,7 @@ object TypeClasses extends App {
     def serialize(value: T): String
   }
 
-  object UserSerializer extends HTMLSerializer[User] { // this is called a type class instance
+  implicit object UserSerializer extends HTMLSerializer[User] { // this is called a type class instance
     override def serialize(user: User): String = s"<div>${user.name} (${user.age} yo) <a href=${user.email} /> </div>"
   }
 
@@ -46,7 +46,7 @@ object TypeClasses extends App {
     */
 
   object PartialUserSerializer extends HTMLSerializer[User] {
-    override def serialize(value: User): String = s"<div>${user.name}</div>"
+    override def serialize(user: User): String = s"<div>${user.name}</div>"
   }
 
   /**
@@ -66,7 +66,36 @@ object TypeClasses extends App {
     def eq(userA: T, userB: T): Boolean
   }
 
-  object UserEquality extends Equal[User] {
+  implicit object UserEquality extends Equal[User] {
     override def eq(userA: User, userB: User): Boolean = userA.name == userB.name && userA.email == userB.email
   }
+
+  // Implicits and Type classes
+  object HTMLSerializer {
+    def serialize[T](value: T)(implicit serializer: HTMLSerializer[T]): String = {
+      serializer.serialize(value)
+    }
+
+    def apply[T](implicit serializer: HTMLSerializer[T]): HTMLSerializer[T] = serializer
+  }
+
+  implicit object IntSerializer extends HTMLSerializer[Int] {
+    override def serialize(value: Int): String = s"<div>$value</div>"
+  }
+
+  println(HTMLSerializer.serialize(42)) // we don't need to supply the serializer here, because we have an implicit one for ints above
+  println(HTMLSerializer.serialize(john)) // also implicit here with the user serializer
+  println(HTMLSerializer[User].serialize(john)) // this is even better because now we have access to other methods aside from serialize
+
+  /**
+    * Excercise:
+    * Implement this TC pattern for equality type class
+    */
+
+  object Equal {
+    def apply[T](a: T, b: T)(implicit equalizer: Equal[T]): Boolean = equalizer.eq(a, b)
+  }
+
+  val anotherJohn = User("AnotherJOhn", 45, "superJOhn@gmail.com")
+  println(Equal(john, anotherJohn)) // this is called AD-HOC polymorphism, based on the type of comparisons, the compiler will grab the right comparator instance for the types
 }
