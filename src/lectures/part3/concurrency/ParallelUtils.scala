@@ -61,15 +61,15 @@ object ParallelUtils extends App {
     *   - You can even roll your own taskSupport
     */
 
-  aParVector.tasksupport = new TaskSupport {
-    override val environment: AnyRef = _
-
-    override def execute[R, Tp](fjtask: Task[R, Tp]): () => R = ???
-
-    override def executeAndWaitResult[R, Tp](task: Task[R, Tp]): R = ???
-
-    override def parallelismLevel: Int = ???
-  }
+//  aParVector.tasksupport = new TaskSupport {
+//    override val environment: AnyRef = _
+//
+//    override def execute[R, Tp](fjtask: Task[R, Tp]): () => R = ???
+//
+//    override def executeAndWaitResult[R, Tp](task: Task[R, Tp]): R = ???
+//
+//    override def parallelismLevel: Int = ???
+//  }
 
   // Atomic ops and references, atomic as it either runs fully or not at all
   val atomic = new AtomicReference[Int](2)
@@ -81,6 +81,5 @@ object ParallelUtils extends App {
   atomic.getAndUpdate(_ + 1) // get the old value, and then run
   atomic.accumulateAndGet(12, _ + _) // thread safe accumulation
   atomic.getAndAccumulate(12, _ + _) // thread safe accumulation but get first
-
 
 }
