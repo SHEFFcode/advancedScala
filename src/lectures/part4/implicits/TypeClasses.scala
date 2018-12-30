@@ -62,14 +62,6 @@ object TypeClasses extends App {
     * Equality type class, has a type eq that compares two values
     */
 
-  trait Equal[T] {
-    def eq(userA: T, userB: T): Boolean
-  }
-
-  implicit object UserEquality extends Equal[User] {
-    override def eq(userA: User, userB: User): Boolean = userA.name == userB.name && userA.email == userB.email
-  }
-
   // Implicits and Type classes
   object HTMLSerializer {
     def serialize[T](value: T)(implicit serializer: HTMLSerializer[T]): String = {
@@ -86,16 +78,4 @@ object TypeClasses extends App {
   println(HTMLSerializer.serialize(42)) // we don't need to supply the serializer here, because we have an implicit one for ints above
   println(HTMLSerializer.serialize(john)) // also implicit here with the user serializer
   println(HTMLSerializer[User].serialize(john)) // this is even better because now we have access to other methods aside from serialize
-
-  /**
-    * Excercise:
-    * Implement this TC pattern for equality type class
-    */
-
-  object Equal {
-    def apply[T](a: T, b: T)(implicit equalizer: Equal[T]): Boolean = equalizer.eq(a, b)
-  }
-
-  val anotherJohn = User("AnotherJOhn", 45, "superJOhn@gmail.com")
-  println(Equal(john, anotherJohn)) // this is called AD-HOC polymorphism, based on the type of comparisons, the compiler will grab the right comparator instance for the types
 }
